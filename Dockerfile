@@ -1,15 +1,17 @@
 FROM alpine:latest
 
-ENV LD_LIBRARY_PATH=/lib
+RUN apk --no-cache add libaio libnsl libc6-compat curl && \
+    cd /tmp && \
+    curl -o instantclient-basiclite.zip https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip -SL && \
+    unzip instantclient-basiclite.zip && \
+    mv instantclient*/ /usr/lib/instantclient && \
+    rm instantclient-basiclite.zip && \
+    ln -s /usr/lib/instantclient/libclntsh.so.21.1 /usr/lib/libclntsh.so && \
+    ln -s /usr/lib/instantclient/libocci.so.21.1 /usr/lib/libocci.so && \
+    ln -s /usr/lib/instantclient/libociicus.so /usr/lib/libociicus.so && \
+    ln -s /usr/lib/instantclient/libnnz21.so /usr/lib/libnnz21.so && \
+    ln -s /usr/lib/libnsl.so.2 /usr/lib/libnsl.so.1 && \
+    ln -s /lib/libc.so.6 /usr/lib/libresolv.so.2 && \
+    ln -s /lib64/ld-linux-x86-64.so.2 /usr/lib/ld-linux-x86-64.so.2
 
-RUN wget https://download.oracle.com/otn_software/linux/instantclient/216000/instantclient-basiclite-linux.x64-21.6.0.0.0dbru.zip && \
-    unzip instantclient-basiclite-linux.x64-21.6.0.0.0dbru.zip && \
-    cp -r instantclient_21_6/* /lib && \
-    rm -rf instantclient-basiclite-linux.x64-21.6.0.0.0dbru.zip && \
-    apk add libaio && \
-    apk add libaio libnsl libc6-compat && \
-    cd /lib && \
-    # Linking ld-linux-x86-64.so.2 to the lib/ location (Update accordingly)
-    ln -s /lib64/* /lib && \
-    ln -s libnsl.so.2 /usr/lib/libnsl.so.1 && \
-    ln -s libc.so /usr/lib/libresolv.so.2
+ENV LD_LIBRARY_PATH /usr/lib/instantclient
